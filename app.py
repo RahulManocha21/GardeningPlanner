@@ -78,6 +78,8 @@ def load_vectors():
 
     return vectors
 
+
+st.set_page_config(page_title='Chat with Documents', page_icon='📝', layout='wide')
 st.title("ChatGroq with RAG Pipeline")
 
 llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="llama3-8b-8192")
@@ -98,7 +100,8 @@ retriever = vectors.as_retriever()
 retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
 input_text = st.text_input("Input your prompt here")
-if input_text:
+submit = st.button('Get Answer')
+if submit:
     response = retrieval_chain.invoke({"input": input_text})
     st.write(response['answer'])
     
