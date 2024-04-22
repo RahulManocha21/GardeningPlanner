@@ -17,7 +17,7 @@ import hashlib
 load_dotenv()
 
 # Load the Groq API key
-groq_api_key = os.environ['GROQ_API_KEY']
+groq_api_key = st.secrets["SecretKey"]["GROQ_API_KEY"]
 # Set the path to your vector store directory
 def load_vectors():
     VECTOR_STORE_DIR = "./vector_store"
