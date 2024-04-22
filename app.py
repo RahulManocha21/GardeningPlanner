@@ -10,14 +10,16 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 import time
-from dotenv import load_dotenv
 import pickle
 import hashlib
 
-load_dotenv()
+os.environ["GROQ_API_KEY"]= st.secrets["GROQ_API_KEY"]
+os.environ["HF_API_KEY"]= st.secrets["HF_API_KEY"]
+os.environ["LANGCHAIN_TRACING_V2"]= st.secrets["LANGCHAIN_TRACING_V2"]
+os.environ["LANGCHAIN_ENDPOINT"]= st.secrets["LANGCHAIN_ENDPOINT"]
+os.environ["LANGCHAIN_API_KEY"]= st.secrets["LANGCHAIN_API_KEY"]
+os.environ["LANGCHAIN_PROJECT"]= st.secrets["LANGCHAIN_PROJECT"]
 
-# Load the Groq API key
-groq_api_key = os.environ['GROQ_API_KEY']
 # Set the path to your vector store directory
 def load_vectors():
     VECTOR_STORE_DIR = "./vector_store"
@@ -77,7 +79,7 @@ def load_vectors():
 
 st.title("ChatGroq with RAG Pipeline")
 
-llm = ChatGroq(groq_api_key=groq_api_key, model_name="llama3-8b-8192")
+llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="llama3-8b-8192")
 prompt = ChatPromptTemplate.from_template(
     """
     Answer the questions based on the provided context only if there is something out of context, response as 'Hi there, Ask me about the catalog information only'. 
