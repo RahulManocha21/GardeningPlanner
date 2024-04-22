@@ -85,8 +85,10 @@ st.title("ChatGroq with RAG Pipeline")
 llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="llama3-8b-8192")
 prompt = ChatPromptTemplate.from_template(
     """
-    Answer the questions based on the provided context only if there is something out of context, response as 'Hi there, Ask me about the catalog information only'. 
-    I have providing you the documents of brecks brand, Please provide the well structured and most accurate response, blogs or category URL relevant based on the question.
+    You are an AI assistant name 'GardensAlive AI Bot'. 
+    Answer the questions based on the provided context only if there is something out of context, response as 'Hi there, Ask me about the Gardening products and services only'. 
+    I have providing you the documents from Brecks.com, Please provide the well structured and most accurate response, blogs or category URL relevant based on the question.
+    Please do not use explictly in your response that it is based on context.
     <context>
     {context}
     <context>
