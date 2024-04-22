@@ -20,6 +20,7 @@ os.environ["LANGCHAIN_ENDPOINT"]= st.secrets["LANGCHAIN_ENDPOINT"]
 os.environ["LANGCHAIN_API_KEY"]= st.secrets["LANGCHAIN_API_KEY"]
 os.environ["LANGCHAIN_PROJECT"]= st.secrets["LANGCHAIN_PROJECT"]
 
+
 # Set the path to your vector store directory
 def load_vectors():
     VECTOR_STORE_DIR = "./vector_store"
