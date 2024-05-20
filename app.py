@@ -78,26 +78,26 @@ def load_vectors():
 
     return vectors
 
-def load_webdata():
-    VECTOR_STORE_DIR = "./vector_store"
-    os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
-    vector_store_path = os.path.join(VECTOR_STORE_DIR, "vector_store_webdata.pkl")
-    if os.path.exists(vector_store_path):
-        with open(vector_store_path, "rb") as f:
-            vectors = pickle.load(f)
-    else:
-        with st.spinner('Updating vector store...'):
-            csv= pd.read_csv(r'Content/category.csv')
-            urls = csv['loc'].tolist()
-            embeddings = HuggingFaceBgeEmbeddings(model_name="BAAI/bge-small-en-v1.5", encode_kwargs={'normalize_embeddings': True})
-            loader= SeleniumURLLoader(urls=urls[:100], continue_on_failure=True)
-            docs= loader.load()
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-            final_documents = text_splitter.split_documents(docs)
-            vectors = FAISS.from_documents(final_documents, embeddings)
-            with open(vector_store_path, "wb") as f:
-                    pickle.dump(vectors, f)
-    return vectors
+# def load_webdata():
+#     VECTOR_STORE_DIR = "./vector_store"
+#     os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
+#     vector_store_path = os.path.join(VECTOR_STORE_DIR, "vector_store_webdata.pkl")
+#     if os.path.exists(vector_store_path):
+#         with open(vector_store_path, "rb") as f:
+#             vectors = pickle.load(f)
+#     else:
+#         with st.spinner('Updating vector store...'):
+#             csv= pd.read_csv(r'Content/category.csv')
+#             urls = csv['loc'].tolist()
+#             embeddings = HuggingFaceBgeEmbeddings(model_name="BAAI/bge-small-en-v1.5", encode_kwargs={'normalize_embeddings': True})
+#             loader= SeleniumURLLoader(urls=urls[:100], continue_on_failure=True)
+#             docs= loader.load()
+#             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+#             final_documents = text_splitter.split_documents(docs)
+#             vectors = FAISS.from_documents(final_documents, embeddings)
+#             with open(vector_store_path, "wb") as f:
+#                     pickle.dump(vectors, f)
+#     return vectors
 
 
 
@@ -119,7 +119,7 @@ prompt = ChatPromptTemplate.from_template(
     """
 )
 
-vectors = load_webdata()
+vectors = load_vectors()
 document_chain = create_stuff_documents_chain(llm, prompt)
 retriever = vectors.as_retriever()
 retrieval_chain = create_retrieval_chain(retriever, document_chain)
