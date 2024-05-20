@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from langchain_groq import ChatGroq
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, SeleniumURLLoader
 from langchain_community.document_loaders.csv_loader import CSVLoader
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,6 +11,7 @@ from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
 import time
 import pickle
+import pandas as pd
 import hashlib
 
 os.environ["GROQ_API_KEY"]= st.secrets["GROQ_API_KEY"]
@@ -19,7 +20,6 @@ os.environ["LANGCHAIN_TRACING_V2"]= st.secrets["LANGCHAIN_TRACING_V2"]
 os.environ["LANGCHAIN_ENDPOINT"]= st.secrets["LANGCHAIN_ENDPOINT"]
 os.environ["LANGCHAIN_API_KEY"]= st.secrets["LANGCHAIN_API_KEY"]
 os.environ["LANGCHAIN_PROJECT"]= st.secrets["LANGCHAIN_PROJECT"]
-
 
 # Set the path to your vector store directory
 def load_vectors():
@@ -78,8 +78,32 @@ def load_vectors():
 
     return vectors
 
+def load_webdata():
+    VECTOR_STORE_DIR = "./vector_store"
+    os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
+    vector_store_path = os.path.join(VECTOR_STORE_DIR, "vector_store_webdata.pkl")
+    if os.path.exists(vector_store_path):
+        with open(vector_store_path, "rb") as f:
+            vectors = pickle.load(f)
+    else:
+        with st.spinner('Updating vector store...'):
+            csv= pd.read_csv(r'Content/category.csv')
+            urls = csv['loc'].tolist()
+            embeddings = HuggingFaceBgeEmbeddings(model_name="BAAI/bge-small-en-v1.5", encode_kwargs={'normalize_embeddings': True})
+            loader= SeleniumURLLoader(urls=urls[:100], continue_on_failure=True)
+            docs= loader.load()
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+            final_documents = text_splitter.split_documents(docs)
+            vectors = FAISS.from_documents(final_documents, embeddings)
+            with open(vector_store_path, "wb") as f:
+                    pickle.dump(vectors, f)
+    return vectors
 
-st.set_page_config(page_title='Chat with Documents', page_icon='📝', layout='wide')
+
+
+st.set_page_config(page_title='Chat with Documents', page_icon='📝', 
+                   layout='wide', initial_sidebar_state="collapsed")
+
 st.title("ChatGroq with RAG Pipeline")
 
 llm = ChatGroq(groq_api_key=os.environ['GROQ_API_KEY'], model_name="llama3-8b-8192")
@@ -87,7 +111,6 @@ prompt = ChatPromptTemplate.from_template(
     """
     You are an AI assistant name 'GardensAlive AI Bot'. 
     Answer the questions based on the provided context only if there is something out of context, response as 'Hi there, Ask me about the Gardening products and services only'. 
-    I have providing you the documents from Brecks.com, Please provide the well structured and most accurate response, blogs or category URL relevant based on the question.
     Please do not use explictly in your response that it is based on context.
     <context>
     {context}
@@ -96,7 +119,7 @@ prompt = ChatPromptTemplate.from_template(
     """
 )
 
-vectors = load_vectors()
+vectors = load_webdata()
 document_chain = create_stuff_documents_chain(llm, prompt)
 retriever = vectors.as_retriever()
 retrieval_chain = create_retrieval_chain(retriever, document_chain)

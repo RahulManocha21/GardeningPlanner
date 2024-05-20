@@ -11,3 +11,7 @@ langchain-groq
 langchainhub
 groq
 sentence-transformers
+captcha 
+pymongo
+selenium
+unstructured

@@ -81,6 +81,7 @@ target/
 .ipynb_checkpoints
 .streamlit/secrets.toml
 vector_store/*
+research.ipynb
 
 # IPython
 profile_default/
